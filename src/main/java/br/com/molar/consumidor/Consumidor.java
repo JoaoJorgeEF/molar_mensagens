@@ -4,6 +4,9 @@ import br.com.molar.entities.ImovelDesejado;
 import br.com.molar.entities.ImovelOfertado;
 import br.com.molar.repository.ImovelDesejadoRepository;
 import br.com.molar.repository.ImovelOfertadoRepository;
+import br.com.molar.workers.ImovelDesejadoMatcher;
+import br.com.molar.workers.ImovelOfertadoMatcher;
+import br.com.molar.workers.base.BaseWorker;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -21,30 +24,31 @@ public class Consumidor {
     @Autowired
     ImovelOfertadoRepository imovelOfertadoRepository;
 
+    @Autowired
+    ImovelOfertadoMatcher imovelOfertadoMatcher;
+
     public void consumir(String nomeFila) throws Exception {
-        //criando a fabrica de conexoes e criando uma conexao
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost("localhost");
         connectionFactory.setUsername("mqadmin");
         connectionFactory.setPassword("Admin123XX_");
         Connection conexao = connectionFactory.newConnection();
 
-        //criando um canal e declarando uma fila
         Channel canal = conexao.createChannel();
         canal.queueDeclare(nomeFila, false, false, false, null);
 
-        //Definindo a funcao callback
         DeliverCallback callback = (consumerTag, delivery) -> {
             Long id = Long.parseLong(new String(delivery.getBody()));
             System.out.println("Mensagem recebida, objeto do tipo("+ nomeFila +") de ID("+ id +")");
-            buscarEntidade(nomeFila == "ImovelDesejado" ? imovelDesejadoRepository : imovelOfertadoRepository, nomeFila, id);
+            buscarEntidade(nomeFila == "ImovelDesejado" ? imovelDesejadoRepository : imovelOfertadoRepository,
+                            nomeFila == "ImovelDesejado" ? null : imovelOfertadoMatcher,
+                            nomeFila, id);
         };
 
-        //Consome da fila
         canal.basicConsume(nomeFila, true, callback, consumerTag -> {});
     }
 
-    public static void buscarEntidade(JpaRepository repo, String nomeClasse, long id){
+    public static void buscarEntidade(JpaRepository repo, Object matcher, String nomeClasse, long id){
         switch (nomeClasse){
             case "ImovelDesejado":
                 ImovelDesejadoRepository imDesRepo = (ImovelDesejadoRepository)repo;
@@ -54,6 +58,8 @@ public class Consumidor {
                     break;
                 }
                 System.out.println("Imóvel Desejado de ID("+ imovelDesejado.getId() +") encontrado");
+                ImovelDesejadoMatcher imovelDesejadoMatcher = (ImovelDesejadoMatcher)matcher;
+                imovelDesejadoMatcher.executar(imovelDesejado);
                 break;
             case "ImovelOfertado":
                 ImovelOfertadoRepository imOfRepo = (ImovelOfertadoRepository)repo;
@@ -63,6 +69,8 @@ public class Consumidor {
                     break;
                 }
                 System.out.println("Imóvel Ofertado de ID("+ imovelOfertado.getId() +") encontrado");
+                ImovelOfertadoMatcher imovelOfertadoMatcher = (ImovelOfertadoMatcher)matcher;
+                imovelOfertadoMatcher.executar(imovelOfertado);
                 break;
         }
     }

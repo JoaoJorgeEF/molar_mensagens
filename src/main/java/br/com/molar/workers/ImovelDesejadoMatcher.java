@@ -16,14 +16,14 @@ public class ImovelDesejadoMatcher extends BaseWorker {
         for (ImovelOfertado imovelOfertado : imoveisOfertados) {
             if (imovelDesejado.getArea() <= imovelOfertado.getArea() &&
                 imovelDesejado.getTipoImovel() == imovelOfertado.getTipoImovel() &&
-                imovelDesejado.getBairro() == imovelOfertado.getBairro()){
+                imovelDesejado.getBairro().equals(imovelOfertado.getBairro())){
                 Match match = new Match();
                 match.setImovelDesejado(imovelDesejado);
                 match.setImovelOfertado(imovelOfertado);
-                if (matchRepository.findByIdImovelOfertadoEIdImovelDesejado(imovelOfertado.getId(), imovelDesejado.getId()) != null){
+                if (matchRepository.findByIdImovelOfertadoEIdImovelDesejado(imovelOfertado.getId(), imovelDesejado.getId()) == null){
                     matchRepository.save(match);
+                    System.out.println("Match criado com imóvel ofertado de ID("+imovelOfertado.getId()+")");
                 }
-                System.out.println("Match criado com imóvel ofertado de ID("+imovelOfertado.getId()+")");
             }
         }
 

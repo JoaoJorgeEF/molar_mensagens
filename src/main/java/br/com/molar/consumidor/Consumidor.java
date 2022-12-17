@@ -49,12 +49,20 @@ public class Consumidor {
             case "ImovelDesejado":
                 ImovelDesejadoRepository imDesRepo = (ImovelDesejadoRepository)repo;
                 ImovelDesejado imovelDesejado = imDesRepo.findById(id).orElse(null);
-                System.out.println(imovelDesejado.toString());
+                if (imovelDesejado == null){
+                    System.out.println("Não foi encotrado Imóvel Desejado com o ID("+id+") informado");
+                    break;
+                }
+                System.out.println("Imóvel Desejado de ID("+ imovelDesejado.getId() +") encontrado");
                 break;
             case "ImovelOfertado":
                 ImovelOfertadoRepository imOfRepo = (ImovelOfertadoRepository)repo;
                 ImovelOfertado imovelOfertado = imOfRepo.findById(id).orElse(null);
-                System.out.println(imovelOfertado.getBairro());
+                if (imovelOfertado == null){
+                    System.out.println("Não foi encotrado Imóvel Ofertado com o ID("+id+") informado");
+                    break;
+                }
+                System.out.println("Imóvel Ofertado de ID("+ imovelOfertado.getId() +") encontrado");
                 break;
         }
     }

@@ -18,7 +18,6 @@ public class MolarMensagensApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        consumidor.consumir("ImovelOfertado");
-        consumidor.consumir("ImovelDesejado");
+        consumidor.consumir();
     }
 }

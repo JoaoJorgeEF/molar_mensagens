@@ -4,9 +4,11 @@ import br.com.molar.entities.ImovelDesejado;
 import br.com.molar.entities.ImovelOfertado;
 import br.com.molar.entities.Match;
 import br.com.molar.workers.base.BaseWorker;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class ImovelDesejadoMatcher extends BaseWorker {
 
     public void executar(ImovelDesejado imovelDesejado){

@@ -27,7 +27,10 @@ public class Consumidor {
     @Autowired
     ImovelOfertadoMatcher imovelOfertadoMatcher;
 
-    public void consumir(String nomeFila) throws Exception {
+    @Autowired
+    ImovelDesejadoMatcher imovelDesejadoMatcher;
+
+    public void consumir() throws Exception {
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost("localhost");
         connectionFactory.setUsername("mqadmin");
@@ -35,17 +38,24 @@ public class Consumidor {
         Connection conexao = connectionFactory.newConnection();
 
         Channel canal = conexao.createChannel();
-        canal.queueDeclare(nomeFila, false, false, false, null);
+        String filaDesejado = "ImovelDesejado";
+        String filaOfertado = "ImovelOfertado";
+        canal.queueDeclare(filaDesejado, false, false, false, null);
+        canal.queueDeclare(filaOfertado, false, false, false, null);
 
         DeliverCallback callback = (consumerTag, delivery) -> {
             Long id = Long.parseLong(new String(delivery.getBody()));
-            System.out.println("Mensagem recebida, objeto do tipo("+ nomeFila +") de ID("+ id +")");
-            buscarEntidade(nomeFila == "ImovelDesejado" ? imovelDesejadoRepository : imovelOfertadoRepository,
-                            nomeFila == "ImovelDesejado" ? null : imovelOfertadoMatcher,
-                            nomeFila, id);
+            System.out.println("Mensagem recebida, objeto do tipo("+ filaDesejado +") de ID("+ id +")");
+            buscarEntidade(imovelDesejadoRepository, imovelDesejadoMatcher, filaDesejado, id);
+        };
+        DeliverCallback callback2 = (consumerTag, delivery) -> {
+            Long id = Long.parseLong(new String(delivery.getBody()));
+            System.out.println("Mensagem recebida, objeto do tipo("+ filaOfertado +") de ID("+ id +")");
+            buscarEntidade(imovelOfertadoRepository, imovelOfertadoMatcher, filaOfertado, id);
         };
 
-        canal.basicConsume(nomeFila, true, callback, consumerTag -> {});
+        canal.basicConsume(filaDesejado, true, callback, consumerTag -> {});
+        canal.basicConsume(filaOfertado, true, callback2, consumerTag -> {});
     }
 
     public static void buscarEntidade(JpaRepository repo, Object matcher, String nomeClasse, long id){

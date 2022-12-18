@@ -43,19 +43,19 @@ public class Consumidor {
         canal.queueDeclare(filaDesejado, false, false, false, null);
         canal.queueDeclare(filaOfertado, false, false, false, null);
 
-        DeliverCallback callback = (consumerTag, delivery) -> {
+        DeliverCallback callbackDesejado = (consumerTag, delivery) -> {
             Long id = Long.parseLong(new String(delivery.getBody()));
             System.out.println("Mensagem recebida, objeto do tipo("+ filaDesejado +") de ID("+ id +")");
             buscarEntidade(imovelDesejadoRepository, imovelDesejadoMatcher, filaDesejado, id);
         };
-        DeliverCallback callback2 = (consumerTag, delivery) -> {
+        DeliverCallback callbackOfertado = (consumerTag, delivery) -> {
             Long id = Long.parseLong(new String(delivery.getBody()));
             System.out.println("Mensagem recebida, objeto do tipo("+ filaOfertado +") de ID("+ id +")");
             buscarEntidade(imovelOfertadoRepository, imovelOfertadoMatcher, filaOfertado, id);
         };
 
-        canal.basicConsume(filaDesejado, true, callback, consumerTag -> {});
-        canal.basicConsume(filaOfertado, true, callback2, consumerTag -> {});
+        canal.basicConsume(filaDesejado, true, callbackDesejado, consumerTag -> {});
+        canal.basicConsume(filaOfertado, true, callbackOfertado, consumerTag -> {});
     }
 
     public static void buscarEntidade(JpaRepository repo, Object matcher, String nomeClasse, long id){

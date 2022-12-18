@@ -51,6 +51,8 @@ public class ImovelDesejado extends BaseEntity<Long> {
     @OneToMany(mappedBy = "imovelDesejado", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     public List<Match> matches;
 
+    public boolean hasMatches;
+
     @NotNull(message = "É necessário informar o id do cliente")
     public int usuario_id;
 

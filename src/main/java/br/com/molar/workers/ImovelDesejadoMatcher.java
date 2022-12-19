@@ -17,13 +17,14 @@ public class ImovelDesejadoMatcher extends BaseWorker {
         List<ImovelOfertado> imoveisOfertados = imovelOfertadoRepository.findDifferentFromIdUsuario(imovelDesejado.getUsuario_id());
         int hasMatchesCounter = 0;
         for (ImovelOfertado imovelOfertado : imoveisOfertados) {
+            Match matchAntigo = matchRepository.findByIdImovelOfertadoEIdImovelDesejado(imovelOfertado.getId(), imovelDesejado.getId());
             if (temMatch(imovelOfertado, imovelDesejado)){
 
                 Match match = new Match();
                 match.setImovelDesejado(imovelDesejado);
                 match.setImovelOfertado(imovelOfertado);
 
-                if (matchRepository.findByIdImovelOfertadoEIdImovelDesejado(imovelOfertado.getId(), imovelDesejado.getId()) == null){
+                if (matchAntigo == null){
                     matchRepository.save(match);
                     imovelOfertado.setHasMatches(true);
                     imovelOfertadoRepository.save(imovelOfertado);
@@ -31,9 +32,12 @@ public class ImovelDesejadoMatcher extends BaseWorker {
                     hasMatchesCounter++;
                 }
 
+            } else if (matchAntigo != null){
+                matchRepository.deleteById(matchAntigo.getId());
             }
         }
         if (hasMatchesCounter > 0) imovelDesejado.setHasMatches(true);
+        else imovelDesejado.setHasMatches(false);
 
         imovelDesejadoRepository.save(imovelDesejado);
         System.out.println("Execução finalizada para o ImovelDesejado("+imovelDesejado.getId()+")");

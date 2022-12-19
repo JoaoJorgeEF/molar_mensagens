@@ -48,7 +48,7 @@ public class ImovelDesejado extends BaseEntity<Long> {
     @Min(value = 1, message = "O valor mínimo para preço é 1.")
     public BigDecimal preco;
 
-    @OneToMany(mappedBy = "imovelDesejado", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "imovelDesejado", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     public List<Match> matches;
 
     public boolean hasMatches;
